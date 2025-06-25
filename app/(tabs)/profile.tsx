@@ -8,7 +8,7 @@ import {
   Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Settings, Grid, Bookmark, Heart, Clock } from 'lucide-react-native';
+import { Settings, Grid, Bookmark, Heart, Clock, LogOut } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import typography from '@/constants/typography';
 import layout from '@/constants/layout';
@@ -23,7 +23,7 @@ import SectionHeader from '@/components/ui/SectionHeader';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, analysisResults } = useUserStore();
+  const { user, analysisResults, logout } = useUserStore();
   const { wishlist } = useProductStore();
   const { posts, getSavedPosts } = useFeedStore();
   
@@ -31,6 +31,11 @@ export default function ProfileScreen() {
   const userPosts = posts.filter(post => post.user.id === user?.id);
 
   const [activeTab, setActiveTab] = React.useState('analyses');
+
+  const handleLogout = () => {
+    logout();
+    // The redirect will happen automatically in _layout.tsx
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -175,12 +180,24 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <Button 
-          title="Edit Profile" 
-          variant="outline" 
-          size="medium" 
-          style={styles.editButton}
-        />
+        <View style={styles.profileButtons}>
+          <Button 
+            title="Edit Profile" 
+            variant="outline" 
+            size="medium" 
+            style={styles.editButton}
+          />
+          
+          <Button 
+            title="Logout" 
+            variant="outline" 
+            size="medium" 
+            style={styles.logoutButton}
+            leftIcon={<LogOut size={layout.iconSize.s} color={colors.error} />}
+            textStyle={styles.logoutButtonText}
+            onPress={handleLogout}
+          />
+        </View>
       </View>
 
       <View style={styles.tabsContainer}>
@@ -293,8 +310,23 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
     alignSelf: 'center',
   },
+  profileButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    width: '100%',
+    gap: layout.spacing.m,
+  },
   editButton: {
-    width: 150,
+    flex: 1,
+    maxWidth: 150,
+  },
+  logoutButton: {
+    flex: 1,
+    maxWidth: 150,
+    borderColor: colors.error,
+  },
+  logoutButtonText: {
+    color: colors.error,
   },
   tabsContainer: {
     flexDirection: 'row',

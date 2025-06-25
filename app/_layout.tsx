@@ -1,10 +1,11 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import colors from "@/constants/colors";
+import { useUserStore } from "@/store/userStore";
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
@@ -40,6 +41,16 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+  const router = useRouter();
+  const { isLoggedIn } = useUserStore();
+
+  useEffect(() => {
+    // Redirect to login if not logged in
+    if (!isLoggedIn) {
+      router.replace('/login');
+    }
+  }, [isLoggedIn, router]);
+
   return (
     <>
       <StatusBar style="dark" backgroundColor={colors.background} />
@@ -57,6 +68,7 @@ function RootLayoutNav() {
           },
         }}
       >
+        <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen 
           name="color-analysis" 

@@ -21,14 +21,14 @@ export const useUserStore = create<UserState>()(
   persist(
     (set, get) => ({
       user: currentUser,
-      isLoggedIn: true, // For demo purposes, user is logged in by default
+      isLoggedIn: false, // Changed to false by default to show login screen
       analysisResults: recentAnalysis,
       
       setUser: (user) => set({ user }),
       
       login: () => set({ isLoggedIn: true, user: currentUser }),
       
-      logout: () => set({ isLoggedIn: false, user: null }),
+      logout: () => set({ isLoggedIn: false }),
       
       addAnalysisResult: (result) => {
         set((state) => ({

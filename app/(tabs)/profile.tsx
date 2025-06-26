@@ -36,8 +36,10 @@ export default function ProfileScreen() {
   const [activeTab, setActiveTab] = useState('analyses');
 
   const handleLogout = () => {
+    // Explicitly call logout function from the store
     logout();
     // The redirect will happen automatically in _layout.tsx
+    console.log('Logout function called');
   };
 
   const handleSettingsPress = () => {
@@ -54,7 +56,7 @@ export default function ProfileScreen() {
             // Edit Profile
             console.log('Edit Profile pressed');
           } else if (buttonIndex === 2) {
-            // Logout
+            // Logout - Make sure to call handleLogout directly
             handleLogout();
           }
         }
@@ -67,7 +69,12 @@ export default function ProfileScreen() {
         [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Edit Profile', onPress: () => console.log('Edit Profile pressed') },
-          { text: 'Logout', onPress: handleLogout, style: 'destructive' },
+          // Make sure the onPress handler is correctly bound to handleLogout
+          { 
+            text: 'Logout', 
+            onPress: () => handleLogout(), 
+            style: 'destructive' 
+          },
         ],
         { cancelable: true }
       );

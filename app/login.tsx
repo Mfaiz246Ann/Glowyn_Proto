@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
@@ -13,17 +13,32 @@ import colors from '@/constants/colors';
 import typography from '@/constants/typography';
 import layout from '@/constants/layout';
 import { useUserStore } from '@/store/userStore';
+import { currentUser, popularUsers } from '@/mocks/users';
+import { UserProfile } from '@/types';
 
 // Components
 import Button from '@/components/ui/Button';
+import GoogleLoginModal from '@/components/auth/GoogleLoginModal';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login } = useUserStore();
+  const { login, setUser } = useUserStore();
+  const [isGoogleModalVisible, setIsGoogleModalVisible] = useState(false);
+
+  // Combine current user and popular users for the account selection
+  const accounts = [currentUser, ...popularUsers];
 
   const handleGoogleLogin = () => {
-    // In a real app, this would trigger Google OAuth
+    // Show the Google account selection modal
+    setIsGoogleModalVisible(true);
+  };
+
+  const handleAccountSelect = (account: UserProfile) => {
+    // Set the selected user and login
+    setUser(account);
     login();
+    // Close the modal
+    setIsGoogleModalVisible(false);
     // The redirect will happen automatically in _layout.tsx
   };
 
@@ -87,6 +102,14 @@ export default function LoginScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Google Login Modal */}
+      <GoogleLoginModal
+        visible={isGoogleModalVisible}
+        onClose={() => setIsGoogleModalVisible(false)}
+        accounts={accounts}
+        onSelectAccount={handleAccountSelect}
+      />
     </SafeAreaView>
   );
 }

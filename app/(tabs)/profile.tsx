@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
@@ -6,6 +6,9 @@ import {
   ScrollView, 
   TouchableOpacity, 
   Image,
+  ActionSheetIOS,
+  Platform,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Settings, Grid, Bookmark, Heart, Clock, LogOut } from 'lucide-react-native';
@@ -30,11 +33,45 @@ export default function ProfileScreen() {
   const savedPosts = getSavedPosts();
   const userPosts = posts.filter(post => post.user.id === user?.id);
 
-  const [activeTab, setActiveTab] = React.useState('analyses');
+  const [activeTab, setActiveTab] = useState('analyses');
 
   const handleLogout = () => {
     logout();
     // The redirect will happen automatically in _layout.tsx
+  };
+
+  const handleSettingsPress = () => {
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ['Cancel', 'Edit Profile', 'Logout'],
+          cancelButtonIndex: 0,
+          destructiveButtonIndex: 2,
+          title: 'Settings',
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 1) {
+            // Edit Profile
+            console.log('Edit Profile pressed');
+          } else if (buttonIndex === 2) {
+            // Logout
+            handleLogout();
+          }
+        }
+      );
+    } else {
+      // For Android and other platforms
+      Alert.alert(
+        'Settings',
+        'Choose an option',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Edit Profile', onPress: () => console.log('Edit Profile pressed') },
+          { text: 'Logout', onPress: handleLogout, style: 'destructive' },
+        ],
+        { cancelable: true }
+      );
+    }
   };
 
   const renderTabContent = () => {
@@ -152,7 +189,7 @@ export default function ProfileScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
-        <TouchableOpacity onPress={() => console.log('Open settings')}>
+        <TouchableOpacity onPress={handleSettingsPress}>
           <Settings size={layout.iconSize.m} color={colors.text} />
         </TouchableOpacity>
       </View>
@@ -178,25 +215,6 @@ export default function ProfileScreen() {
             <Text style={styles.statValue}>{userPosts.length}</Text>
             <Text style={styles.statLabel}>Posts</Text>
           </View>
-        </View>
-
-        <View style={styles.profileButtons}>
-          <Button 
-            title="Edit Profile" 
-            variant="outline" 
-            size="medium" 
-            style={styles.editButton}
-          />
-          
-          <Button 
-            title="Logout" 
-            variant="outline" 
-            size="medium" 
-            style={styles.logoutButton}
-            leftIcon={<LogOut size={layout.iconSize.s} color={colors.error} />}
-            textStyle={styles.logoutButtonText}
-            onPress={handleLogout}
-          />
         </View>
       </View>
 
@@ -309,24 +327,6 @@ const styles = StyleSheet.create({
     height: '80%',
     backgroundColor: colors.border,
     alignSelf: 'center',
-  },
-  profileButtons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '100%',
-    gap: layout.spacing.m,
-  },
-  editButton: {
-    flex: 1,
-    maxWidth: 150,
-  },
-  logoutButton: {
-    flex: 1,
-    maxWidth: 150,
-    borderColor: colors.error,
-  },
-  logoutButtonText: {
-    color: colors.error,
   },
   tabsContainer: {
     flexDirection: 'row',

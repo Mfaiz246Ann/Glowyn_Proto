@@ -26,7 +26,7 @@ export const useUserStore = create<UserState>()(
       
       setUser: (user) => set({ user }),
       
-      login: () => set({ isLoggedIn: true, user: currentUser }),
+      login: () => set({ isLoggedIn: true }),
       
       logout: () => set({ isLoggedIn: false }),
       

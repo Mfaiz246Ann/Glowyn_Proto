@@ -38,9 +38,8 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     // Explicitly call logout function from the store
     logout();
-    // Explicitly navigate to login screen
-    router.replace('/login');
-    console.log('Logout function called and navigation triggered');
+    // The redirect will happen automatically in _layout.tsx
+    console.log('Logout function called');
   };
 
   const handleSettingsPress = () => {
@@ -73,12 +72,7 @@ export default function ProfileScreen() {
           // Make sure the onPress handler is correctly bound to handleLogout
           { 
             text: 'Logout', 
-            onPress: () => {
-              // Call handleLogout directly to ensure it runs
-              logout();
-              router.replace('/login');
-              console.log('Android logout triggered');
-            }, 
+            onPress: () => handleLogout(), 
             style: 'destructive' 
           },
         ],

@@ -38,7 +38,8 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     // Explicitly call logout function from the store
     logout();
-    // The redirect will happen automatically in _layout.tsx
+    // Explicitly navigate to login screen
+    router.replace('/login');
     console.log('Logout function called');
   };
 

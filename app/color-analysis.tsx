@@ -1,221 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { 
   View, 
   Text, 
   StyleSheet, 
   ScrollView, 
-  Image, 
-  ActivityIndicator,
   TouchableOpacity,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { ArrowLeft, Camera, Upload } from 'lucide-react-native';
-import colors from '@/constants/colors';
-import typography from '@/constants/typography';
-import layout from '@/constants/layout';
-import { useUserStore } from '@/store/userStore';
-import { ColorPalette } from '@/types';
+  Image,
+  SafeAreaView
+} from "react-native";
+import { useRouter } from "expo-router";
+import { ArrowLeft } from "lucide-react-native";
+import colors from "@/constants/colors";
+import typography from "@/constants/typography";
+import layout from "@/constants/layout";
 
 // Components
-import Button from '@/components/ui/Button';
-import InfoCard from '@/components/ui/InfoCard';
-import ColorPaletteItem from '@/components/ui/ColorPaletteItem';
-import ProductCard from '@/components/ui/ProductCard';
-
-// Services
-import { takePhoto, pickImage } from '@/services/imageService';
-import { analyzeImage, getProductRecommendations } from '@/services/aiService';
+import Button from "@/components/ui/Button";
+import InfoCard from "@/components/ui/InfoCard";
+import Card from "@/components/ui/Card";
 
 export default function ColorAnalysisScreen() {
   const router = useRouter();
-  const { addAnalysisResult, getAnalysisByType } = useUserStore();
-  
-  const [imageUri, setImageUri] = useState<string | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
-  const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
-  
-  const existingAnalysis = getAnalysisByType('color');
+  const [selectedSeason, setSelectedSeason] = useState<string | null>(null);
 
-  const handleTakePhoto = async () => {
-    const uri = await takePhoto();
-    if (uri) {
-      setImageUri(uri);
-      setAnalysisResult(null);
-    }
+  const colorSeasons = [
+    {
+      id: "spring",
+      name: "Spring Warm",
+      description: "Warna-warna cerah dan hangat yang cocok untuk kulit dengan undertone hangat kekuningan.",
+      colors: [colors.coral, colors.peach, colors.warmYellow, colors.sageGreen, colors.turquoise],
+    },
+    {
+      id: "summer",
+      name: "Summer Cool",
+      description: "Warna-warna lembut dan dingin yang cocok untuk kulit dengan undertone dingin kebiruan.",
+      colors: ["#B0C4DE", "#D8BFD8", "#ADD8E6", "#E6E6FA", "#F0F8FF"],
+    },
+    {
+      id: "autumn",
+      name: "Autumn Warm",
+      description: "Warna-warna hangat dan dalam yang cocok untuk kulit dengan undertone hangat keemasan.",
+      colors: ["#D2691E", "#CD853F", "#DAA520", "#556B2F", "#8B4513"],
+    },
+    {
+      id: "winter",
+      name: "Winter Cool",
+      description: "Warna-warna kontras dan dingin yang cocok untuk kulit dengan undertone dingin kebiruan.",
+      colors: ["#4B0082", "#800000", "#000080", "#008080", "#FFFFFF"],
+    },
+  ];
+
+  const handleSeasonSelect = (seasonId: string) => {
+    setSelectedSeason(seasonId);
   };
 
-  const handlePickImage = async () => {
-    const uri = await pickImage();
-    if (uri) {
-      setImageUri(uri);
-      setAnalysisResult(null);
-    }
-  };
-
-  const handleAnalyze = async () => {
-    if (!imageUri) return;
-    
-    setIsAnalyzing(true);
-    
-    try {
-      const result = await analyzeImage(imageUri, 'color');
-      setAnalysisResult(result);
-      
-      const products = await getProductRecommendations(result, 'color');
-      setRecommendedProducts(products);
-      
-      // Save analysis result
-      const newAnalysis = {
-        id: `color-analysis-${Date.now()}`,
-        type: 'color',
-        date: new Date().toISOString(),
-        title: 'Analisis Warna',
-        description: 'Temukan palet warna sempurnamu',
-        imageUrl: imageUri,
-        result: result,
-        recommendedProducts: products,
-      };
-      
-      addAnalysisResult(newAnalysis);
-    } catch (error) {
-      console.error('Analysis error:', error);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
-  const renderAnalysisResult = () => {
-    if (!analysisResult) return null;
-    
-    const { colorSeason, palette, recommendations } = analysisResult;
-    
+  const renderColorPalette = (colors: string[]) => {
     return (
-      <View style={styles.resultContainer}>
-        <View style={styles.resultSection}>
-          <Text style={styles.resultTitle}>Musim Warnamu</Text>
-          <Text style={styles.seasonResult}>{colorSeason}</Text>
-        </View>
-        
-        <View style={styles.resultSection}>
-          <Text style={styles.resultTitle}>Palet Warnamu</Text>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.paletteContainer}
-          >
-            {palette.map((color: ColorPalette, index: number) => (
-              <ColorPaletteItem 
-                key={index} 
-                color={color} 
-                style={styles.colorItem} 
-              />
-            ))}
-          </ScrollView>
-        </View>
-        
-        <View style={styles.resultSection}>
-          <Text style={styles.resultTitle}>Rekomendasi</Text>
-          <View style={styles.recommendationsContainer}>
-            {recommendations.map((recommendation: string, index: number) => (
-              <Text key={index} style={styles.recommendationText}>
-                • {recommendation}
-              </Text>
-            ))}
-          </View>
-        </View>
-        
-        {recommendedProducts.length > 0 && (
-          <View style={styles.resultSection}>
-            <Text style={styles.resultTitle}>Produk Rekomendasi</Text>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productsContainer}
-            >
-              {recommendedProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onPress={() => router.push(`/product/${product.id}`)}
-                  style={styles.productCard}
-                />
-              ))}
-            </ScrollView>
-          </View>
-        )}
+      <View style={styles.colorPalette}>
+        {colors.map((color, index) => (
+          <View 
+            key={index} 
+            style={[styles.colorSwatch, { backgroundColor: color }]} 
+          />
+        ))}
       </View>
     );
   };
 
-  const renderExistingAnalysis = () => {
-    if (!existingAnalysis || !existingAnalysis.result) return null;
-    
-    const { colorSeason, palette, recommendations } = existingAnalysis.result;
-    
-    return (
-      <View style={styles.resultContainer}>
-        <View style={styles.resultSection}>
-          <Text style={styles.resultTitle}>Musim Warnamu</Text>
-          <Text style={styles.seasonResult}>{colorSeason}</Text>
-        </View>
-        
-        <View style={styles.resultSection}>
-          <Text style={styles.resultTitle}>Palet Warnamu</Text>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.paletteContainer}
-          >
-            {palette.map((color: ColorPalette, index: number) => (
-              <ColorPaletteItem 
-                key={index} 
-                color={color} 
-                style={styles.colorItem} 
-              />
-            ))}
-          </ScrollView>
-        </View>
-        
-        <View style={styles.resultSection}>
-          <Text style={styles.resultTitle}>Rekomendasi</Text>
-          <View style={styles.recommendationsContainer}>
-            {recommendations.map((recommendation: string, index: number) => (
-              <Text key={index} style={styles.recommendationText}>
-                • {recommendation}
-              </Text>
-            ))}
-          </View>
-        </View>
-        
-        {existingAnalysis.recommendedProducts && existingAnalysis.recommendedProducts.length > 0 && (
-          <View style={styles.resultSection}>
-            <Text style={styles.resultTitle}>Produk Rekomendasi</Text>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productsContainer}
-            >
-              {existingAnalysis.recommendedProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onPress={() => router.push(`/product/${product.id}`)}
-                  style={styles.productCard}
-                />
-              ))}
-            </ScrollView>
-          </View>
-        )}
-      </View>
-    );
-  };
+  const selectedSeasonData = colorSeasons.find(season => season.id === selectedSeason);
 
   return (
-    <ScrollView 
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-    >
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
@@ -223,101 +78,71 @@ export default function ColorAnalysisScreen() {
         >
           <ArrowLeft size={layout.iconSize.m} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Color Analysis</Text>
+        <Text style={styles.headerTitle}>Analisis Warna</Text>
         <View style={styles.placeholder} />
       </View>
 
-      <InfoCard
-        title="Analisis Warna Personal"
-        description="Temukan palet warna alami berdasarkan undertone kulit, rambut, dan warna mata."
-        style={styles.infoCard}
-      />
+      <ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        <InfoCard
+          title="Analisis Warna Personal"
+          description="Temukan palet warna alami berdasarkan undertone kulit, rambut, dan warna mata Anda."
+          style={styles.infoCard}
+        />
 
-      {!imageUri && !analysisResult && !existingAnalysis && (
-        <View style={styles.uploadSection}>
-          <Text style={styles.uploadTitle}>Unggah Foto</Text>
-          <Text style={styles.uploadDescription}>
-            Ambil atau pilih foto dengan pencahayaan alami dan tanpa filter untuk hasil terbaik.
-          </Text>
-          
-          <View style={styles.buttonContainer}>
-            <Button 
-              title="Ambil Foto" 
-              leftIcon={<Camera size={layout.iconSize.s} color="white" />}
-              onPress={handleTakePhoto}
-              style={styles.button}
-            />
-            <Button 
-              title="Pilih Foto" 
-              variant="outline"
-              leftIcon={<Upload size={layout.iconSize.s} color={colors.primary} />}
-              onPress={handlePickImage}
-              style={styles.button}
-            />
-          </View>
-        </View>
-      )}
-
-      {imageUri && !analysisResult && !isAnalyzing && (
-        <View style={styles.previewSection}>
+        <View style={styles.imageContainer}>
           <Image 
-            source={{ uri: imageUri }} 
-            style={styles.previewImage} 
+            source={{ uri: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" }} 
+            style={styles.image}
             resizeMode="cover"
           />
-          <View style={styles.buttonContainer}>
-            <Button 
-              title="Analisis Warna" 
-              onPress={handleAnalyze}
-              style={styles.analyzeButton}
-            />
-            <Button 
-              title="Ganti Foto" 
-              variant="outline"
-              onPress={() => setImageUri(null)}
-            />
-          </View>
         </View>
-      )}
 
-      {isAnalyzing && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Menganalisis warna...</Text>
+        <Text style={styles.sectionTitle}>Pilih Musim Warna Anda</Text>
+
+        <View style={styles.seasonsContainer}>
+          {colorSeasons.map((season) => (
+            <TouchableOpacity
+              key={season.id}
+              style={[
+                styles.seasonCard,
+                selectedSeason === season.id && styles.selectedSeasonCard
+              ]}
+              onPress={() => handleSeasonSelect(season.id)}
+            >
+              <Text style={styles.seasonName}>{season.name}</Text>
+              <View style={styles.seasonColorPreview}>
+                {season.colors.slice(0, 3).map((color, index) => (
+                  <View 
+                    key={index} 
+                    style={[styles.previewSwatch, { backgroundColor: color }]} 
+                  />
+                ))}
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
-      )}
 
-      {analysisResult && renderAnalysisResult()}
-      
-      {!imageUri && !analysisResult && existingAnalysis && (
-        <>
-          <View style={styles.existingAnalysisHeader}>
-            <Text style={styles.existingAnalysisTitle}>Hasil Analisis Sebelumnya</Text>
-            <Text style={styles.existingAnalysisDate}>
-              {new Date(existingAnalysis.date).toLocaleDateString('id-ID')}
-            </Text>
-          </View>
-          
-          {existingAnalysis.imageUrl && (
-            <Image 
-              source={{ uri: existingAnalysis.imageUrl }} 
-              style={styles.existingAnalysisImage} 
-              resizeMode="cover"
-            />
-          )}
-          
-          {renderExistingAnalysis()}
-          
-          <Button 
-            title="Analisis Baru" 
-            onPress={() => setImageUri(null)}
-            style={styles.newAnalysisButton}
-          />
-        </>
-      )}
+        {selectedSeasonData && (
+          <Card variant="elevated" style={styles.resultCard}>
+            <Text style={styles.resultTitle}>Musim Warna Anda: {selectedSeasonData.name}</Text>
+            <Text style={styles.resultDescription}>{selectedSeasonData.description}</Text>
+            {renderColorPalette(selectedSeasonData.colors)}
+            
+            <View style={styles.recommendationsContainer}>
+              <Text style={styles.recommendationsTitle}>Rekomendasi:</Text>
+              <Text style={styles.recommendationItem}>• Gunakan warna-warna dari palet ini untuk pakaian dan makeup</Text>
+              <Text style={styles.recommendationItem}>• Hindari warna yang bertentangan dengan musim warna Anda</Text>
+              <Text style={styles.recommendationItem}>• Aksesoris dengan warna yang sesuai akan meningkatkan penampilan Anda</Text>
+            </View>
+          </Card>
+        )}
 
-      <View style={styles.spacer} />
-    </ScrollView>
+        <View style={styles.spacer} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -327,12 +152,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: layout.spacing.l,
-    paddingTop: layout.spacing.l,
-    paddingBottom: layout.spacing.m,
+    paddingVertical: layout.spacing.m,
   },
   backButton: {
     padding: layout.spacing.xs,
@@ -345,118 +169,104 @@ const styles = StyleSheet.create({
   placeholder: {
     width: layout.iconSize.m + layout.spacing.xs * 2,
   },
+  scrollView: {
+    flex: 1,
+    padding: layout.spacing.l,
+  },
   infoCard: {
-    marginHorizontal: layout.spacing.l,
-  },
-  uploadSection: {
-    padding: layout.spacing.l,
-    alignItems: 'center',
-  },
-  uploadTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text,
-    marginBottom: layout.spacing.s,
-  },
-  uploadDescription: {
-    fontSize: typography.fontSize.m,
-    color: colors.textSecondary,
-    textAlign: 'center',
     marginBottom: layout.spacing.l,
   },
-  buttonContainer: {
-    width: '100%',
-    gap: layout.spacing.m,
-  },
-  button: {
-    width: '100%',
-  },
-  previewSection: {
-    padding: layout.spacing.l,
-    alignItems: 'center',
-  },
-  previewImage: {
-    width: '100%',
-    height: 400,
+  imageContainer: {
+    height: 200,
     borderRadius: layout.borderRadius.m,
+    overflow: "hidden",
     marginBottom: layout.spacing.l,
   },
-  analyzeButton: {
-    marginBottom: layout.spacing.m,
+  image: {
+    width: "100%",
+    height: "100%",
   },
-  loadingContainer: {
-    padding: layout.spacing.xl,
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: typography.fontSize.m,
-    color: colors.textSecondary,
-    marginTop: layout.spacing.m,
-  },
-  resultContainer: {
-    padding: layout.spacing.l,
-  },
-  resultSection: {
-    marginBottom: layout.spacing.xl,
-  },
-  resultTitle: {
+  sectionTitle: {
     fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.bold,
     color: colors.text,
     marginBottom: layout.spacing.m,
   },
-  seasonResult: {
-    fontSize: typography.fontSize.xxl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary,
+  seasonsContainer: {
+    marginBottom: layout.spacing.l,
   },
-  paletteContainer: {
-    paddingBottom: layout.spacing.m,
-  },
-  colorItem: {
-    marginRight: layout.spacing.l,
-  },
-  recommendationsContainer: {
+  seasonCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: layout.spacing.m,
     backgroundColor: colors.card,
     borderRadius: layout.borderRadius.m,
-    padding: layout.spacing.m,
+    marginBottom: layout.spacing.m,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  recommendationText: {
+  selectedSeasonCard: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  seasonName: {
     fontSize: typography.fontSize.m,
-    color: colors.text,
-    marginBottom: layout.spacing.s,
-    lineHeight: typography.lineHeight.m,
-  },
-  productsContainer: {
-    paddingBottom: layout.spacing.m,
-    gap: layout.spacing.m,
-  },
-  productCard: {
-    marginRight: layout.spacing.m,
-  },
-  existingAnalysisHeader: {
-    paddingHorizontal: layout.spacing.l,
-    marginTop: layout.spacing.l,
-  },
-  existingAnalysisTitle: {
-    fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.bold,
     color: colors.text,
   },
-  existingAnalysisDate: {
-    fontSize: typography.fontSize.s,
-    color: colors.textSecondary,
-    marginTop: layout.spacing.xs,
+  seasonColorPreview: {
+    flexDirection: "row",
   },
-  existingAnalysisImage: {
-    width: '100%',
-    height: 250,
-    marginVertical: layout.spacing.l,
+  previewSwatch: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginLeft: layout.spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  newAnalysisButton: {
-    marginHorizontal: layout.spacing.l,
+  resultCard: {
+    marginBottom: layout.spacing.l,
+  },
+  resultTitle: {
+    fontSize: typography.fontSize.l,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text,
+    marginBottom: layout.spacing.s,
+  },
+  resultDescription: {
+    fontSize: typography.fontSize.m,
+    color: colors.text,
+    marginBottom: layout.spacing.m,
+  },
+  colorPalette: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: layout.spacing.m,
+  },
+  colorSwatch: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  recommendationsContainer: {
+    backgroundColor: colors.primaryLight,
+    borderRadius: layout.borderRadius.m,
+    padding: layout.spacing.m,
+  },
+  recommendationsTitle: {
+    fontSize: typography.fontSize.m,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text,
+    marginBottom: layout.spacing.s,
+  },
+  recommendationItem: {
+    fontSize: typography.fontSize.m,
+    color: colors.text,
+    marginBottom: layout.spacing.xs,
   },
   spacer: {
     height: layout.spacing.xl,

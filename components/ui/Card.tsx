@@ -1,26 +1,26 @@
-import React from "react";
-import { View, StyleSheet, ViewStyle } from "react-native";
-import colors from "@/constants/colors";
-import layout from "@/constants/layout";
+import React from 'react';
+import { View, StyleSheet, ViewStyle } from 'react-native';
+import colors from '@/constants/colors';
+import layout from '@/constants/layout';
 
 interface CardProps {
   children: React.ReactNode;
   style?: ViewStyle;
-  variant?: "default" | "elevated" | "outlined";
+  variant?: 'default' | 'elevated' | 'outlined';
   padding?: keyof typeof layout.spacing | number;
 }
 
 const Card: React.FC<CardProps> = ({
   children,
   style,
-  variant = "default",
-  padding = "m",
+  variant = 'default',
+  padding = 'm',
 }) => {
   const getVariantStyle = () => {
     switch (variant) {
-      case "elevated":
+      case 'elevated':
         return styles.elevated;
-      case "outlined":
+      case 'outlined':
         return styles.outlined;
       default:
         return styles.default;
@@ -28,7 +28,7 @@ const Card: React.FC<CardProps> = ({
   };
 
   const getPadding = () => {
-    if (typeof padding === "number") {
+    if (typeof padding === 'number') {
       return padding;
     }
     return layout.spacing[padding];

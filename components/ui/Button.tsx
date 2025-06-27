@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import { 
   TouchableOpacity, 
   Text, 
@@ -7,15 +7,15 @@ import {
   ViewStyle,
   TextStyle,
   TouchableOpacityProps
-} from "react-native";
-import colors from "@/constants/colors";
-import typography from "@/constants/typography";
-import layout from "@/constants/layout";
+} from 'react-native';
+import colors from '@/constants/colors';
+import typography from '@/constants/typography';
+import layout from '@/constants/layout';
 
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
-  variant?: "primary" | "secondary" | "outline" | "text";
-  size?: "small" | "medium" | "large";
+  variant?: 'primary' | 'secondary' | 'outline' | 'text';
+  size?: 'small' | 'medium' | 'large';
   isLoading?: boolean;
   disabled?: boolean;
   style?: ViewStyle;
@@ -26,8 +26,8 @@ interface ButtonProps extends TouchableOpacityProps {
 
 const Button: React.FC<ButtonProps> = ({
   title,
-  variant = "primary",
-  size = "medium",
+  variant = 'primary',
+  size = 'medium',
   isLoading = false,
   disabled = false,
   style,
@@ -38,13 +38,13 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   const getButtonStyle = () => {
     switch (variant) {
-      case "primary":
+      case 'primary':
         return styles.primaryButton;
-      case "secondary":
+      case 'secondary':
         return styles.secondaryButton;
-      case "outline":
+      case 'outline':
         return styles.outlineButton;
-      case "text":
+      case 'text':
         return styles.textButton;
       default:
         return styles.primaryButton;
@@ -53,13 +53,13 @@ const Button: React.FC<ButtonProps> = ({
 
   const getTextStyle = () => {
     switch (variant) {
-      case "primary":
+      case 'primary':
         return styles.primaryText;
-      case "secondary":
+      case 'secondary':
         return styles.secondaryText;
-      case "outline":
+      case 'outline':
         return styles.outlineText;
-      case "text":
+      case 'text':
         return styles.textButtonText;
       default:
         return styles.primaryText;
@@ -68,11 +68,11 @@ const Button: React.FC<ButtonProps> = ({
 
   const getSizeStyle = () => {
     switch (size) {
-      case "small":
+      case 'small':
         return styles.smallButton;
-      case "medium":
+      case 'medium':
         return styles.mediumButton;
-      case "large":
+      case 'large':
         return styles.largeButton;
       default:
         return styles.mediumButton;
@@ -81,11 +81,11 @@ const Button: React.FC<ButtonProps> = ({
 
   const getTextSizeStyle = () => {
     switch (size) {
-      case "small":
+      case 'small':
         return styles.smallText;
-      case "medium":
+      case 'medium':
         return styles.mediumText;
-      case "large":
+      case 'large':
         return styles.largeText;
       default:
         return styles.mediumText;
@@ -107,7 +107,7 @@ const Button: React.FC<ButtonProps> = ({
     >
       {isLoading ? (
         <ActivityIndicator 
-          color={variant === "primary" ? "white" : colors.primary} 
+          color={variant === 'primary' ? 'white' : colors.primary} 
           size="small" 
         />
       ) : (
@@ -135,14 +135,14 @@ const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: layout.borderRadius.m,
   },
   text: {
     fontWeight: typography.fontWeight.medium,
-    textAlign: "center",
+    textAlign: 'center',
   },
   // Variants
   primaryButton: {
@@ -152,16 +152,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryLight,
   },
   outlineButton: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: colors.primary,
   },
   textButton: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
   },
   // Text styles
   primaryText: {
-    color: "white",
+    color: 'white',
   },
   secondaryText: {
     color: colors.primaryDark,

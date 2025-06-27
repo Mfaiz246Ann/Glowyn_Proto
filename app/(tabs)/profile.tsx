@@ -40,7 +40,7 @@ export default function ProfileScreen() {
     logout();
     // Explicitly navigate to login screen
     router.replace('/login');
-    console.log('Logout function called and redirecting to login');
+    console.log('Logout function called');
   };
 
   const handleSettingsPress = () => {
@@ -73,7 +73,7 @@ export default function ProfileScreen() {
           // Make sure the onPress handler is correctly bound to handleLogout
           { 
             text: 'Logout', 
-            onPress: handleLogout, 
+            onPress: () => handleLogout(), 
             style: 'destructive' 
           },
         ],

@@ -1,13 +1,15 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import colors from "@/constants/colors";
+import { useUserStore } from "@/store/userStore";
 
 export const unstable_settings = {
-  initialRouteName: "index",
+  // Ensure that reloading on `/modal` keeps a back button present.
+  initialRouteName: "(tabs)",
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -21,6 +23,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (error) {
       console.error(error);
+      throw error;
     }
   }, [error]);
 
@@ -38,6 +41,16 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+  const router = useRouter();
+  const { isLoggedIn } = useUserStore();
+
+  useEffect(() => {
+    // Redirect to login if not logged in
+    if (!isLoggedIn) {
+      router.replace('/login');
+    }
+  }, [isLoggedIn, router]);
+
   return (
     <>
       <StatusBar style="dark" backgroundColor={colors.background} />
@@ -48,32 +61,82 @@ function RootLayoutNav() {
           },
           headerTintColor: colors.text,
           headerTitleStyle: {
-            fontWeight: "bold",
+            fontWeight: 'bold',
           },
           contentStyle: {
             backgroundColor: colors.background,
           },
         }}
       >
-        <Stack.Screen name="index" options={{ title: "Analisis Kecantikan" }} />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen 
           name="color-analysis" 
           options={{ 
-            title: "Analisis Warna",
+            title: "Color Analysis",
             presentation: "card",
           }} 
         />
         <Stack.Screen 
           name="face-shape" 
           options={{ 
-            title: "Analisis Bentuk Wajah",
+            title: "Face Shape Analysis",
             presentation: "card",
           }} 
         />
         <Stack.Screen 
           name="skin-analysis" 
           options={{ 
-            title: "Analisis Kulit",
+            title: "Skin Analysis",
+            presentation: "card",
+          }} 
+        />
+        <Stack.Screen 
+          name="style-analysis" 
+          options={{ 
+            title: "Style Analysis",
+            presentation: "card",
+          }} 
+        />
+        <Stack.Screen 
+          name="virtual-try-on" 
+          options={{ 
+            title: "Virtual Try-On",
+            presentation: "card",
+          }} 
+        />
+        <Stack.Screen 
+          name="product/[id]" 
+          options={{ 
+            title: "Product Details",
+            presentation: "card",
+          }} 
+        />
+        <Stack.Screen 
+          name="post/[id]" 
+          options={{ 
+            title: "Post",
+            presentation: "card",
+          }} 
+        />
+        <Stack.Screen 
+          name="collection/[id]" 
+          options={{ 
+            title: "Collection",
+            presentation: "card",
+          }} 
+        />
+        <Stack.Screen 
+          name="category/[id]" 
+          options={{ 
+            title: "Category",
+            presentation: "card",
+          }} 
+        />
+        <Stack.Screen 
+          name="user/[id]" 
+          options={{ 
+            title: "Profile",
             presentation: "card",
           }} 
         />
